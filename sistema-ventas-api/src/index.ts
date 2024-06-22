@@ -2,6 +2,7 @@ import express, { Application } from "express";
 import morgan from "morgan";
 import cors from "cors";
 import SwaggerUi  from "swagger-ui-express";
+import swaggerDocs from "./routes/api.routes";
 
 class Server {
     // * Crear la instancia global de nuestra aplicación
@@ -11,6 +12,7 @@ class Server {
     constructor() {
         this.app = express();
         this.config();
+        this.routes();
     }
     
     // * Generar un método para la configuración
@@ -32,7 +34,7 @@ class Server {
     
     // TODO: Generar un método para la configuración de rutas
     private routes():void {
-        throw new Error('Not implemented');
+        this.app.use('/api/docs', SwaggerUi.serve, SwaggerUi.setup(swaggerDocs));
     }
     
     // * Generar un método para inicializar el servicio
