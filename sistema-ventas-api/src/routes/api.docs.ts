@@ -5,7 +5,7 @@ const options = {
         info: {
             version: "1.0.0",
             title: "Sistema Ventas API",
-            description: "Dcumentación API",
+            description: "Documentación API",
             contact: {
                 name: "Jorge Luis Ayala Manrique",
                 url: "https://github.com"
