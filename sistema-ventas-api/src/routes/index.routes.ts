@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { indexController } from "../controllers/index.controller";
 import { validate } from "../middlewares/validator.check";
-import { authRules } from "../rules/auth.rules";
+import { jwtCheck } from "../middlewares/jwt.check";
 
 class IndexRoutes {
     
@@ -31,7 +31,7 @@ class IndexRoutes {
          *              description: Exitoso
          * 
          */
-        this.router.get('/', authRules(), [validate] ,indexController.index);
+        this.router.get('/', [validate, jwtCheck],indexController.index);
 
         /**
          * @swagger
