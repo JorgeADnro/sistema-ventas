@@ -1,0 +1,19 @@
+<mat-sidenav-container>
+    <mat-sidenav #sidenav mode="push">
+        <app-sidebar></app-sidebar>
+    </mat-sidenav>
+    <mat-sidenav-content>
+        <app-header (toggleSidenav)="sidenav.toggle()"></app-header>
+        <router-outlet />
+        <app-footer></app-footer>
+    </mat-sidenav-content>
+</mat-sidenav-container>
+
+<ngx-spinner 
+    bdColor = "rgba(0, 0, 0, 0.8)" 
+    size = "medium" 
+    color = "#ffff00" 
+    type = "pacman"
+    [fullScreen] = "true"><p style="color: white" > Pacmanizando </p>
+</ngx-spinner>
+
