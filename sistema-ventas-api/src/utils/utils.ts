@@ -45,7 +45,7 @@ class Utils {
      * @returns Promise
      * 
      ********************************************************************************/
-    public async hashPassword(password: string): Promise<String> {
+    public async hashPassword(password: string): Promise<string> {
         const salt = await bcrypt.genSaltSync(10);
         return await bcrypt.hashSync(password, salt);
     }
