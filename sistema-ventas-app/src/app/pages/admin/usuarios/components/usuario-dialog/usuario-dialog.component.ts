@@ -102,7 +102,6 @@ export class UsuarioDialogComponent implements OnInit, OnDestroy {
       }, (error) => {
         console.error("Error al crear usuario", error);
       });
-      this.refresh();
     } else {
       var { confirmPassword, password, username, ...updateUser } = formValue;
       const id = this.data.user.cveUsuario;
@@ -111,7 +110,6 @@ export class UsuarioDialogComponent implements OnInit, OnDestroy {
       }, (error) => {
         console.error("Error al actualizar usuario", error);
       });
-      this.refresh();
     }
   }
 
@@ -124,9 +122,5 @@ export class UsuarioDialogComponent implements OnInit, OnDestroy {
     } else {
       formGroup.get('confirmPassword')?.setErrors(null);
     }
-  }
-
-  refresh(): void {
-    window.location.reload();
   }
 }

@@ -59,10 +59,5 @@ export class UsuariosComponent implements OnInit, OnDestroy, AfterViewInit {
         console.error('Error al eliminar usuario:', response.error);
       }
     });
-    this.refresh();
-  }
-
-  refresh(): void {
-    window.location.reload();
   }
 }

@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = "mysql://JorgeADnro:OpDRYNlXQkrH@sistema-ventas-db1.cb0kgsu2qqma.us-east-2.rds.amazonaws.com:3306/sistema_ventas_db"
 }
 
 model Usuario {
