@@ -6,6 +6,8 @@ import { Subject, takeUntil } from 'rxjs';
 import { UsuariosService } from '../../services/usuarios.service';
 import { RolesService } from '../../services/roles.service';
 import { Usuario } from '../../../../../shared/models/usuario.interface';
+import { Rol } from '../../../../../shared/models/rol.interface';
+import { Router } from '@angular/router';
 
 enum Action {
   EDIT = 'edit',
@@ -33,7 +35,8 @@ export class UsuarioDialogComponent implements OnInit, OnDestroy {
     public baseForm: BaseForm,
     private usuarioService: UsuariosService,
     private rolesService: RolesService,
-    public dialogRef: MatDialogRef<UsuarioDialogComponent>
+    public dialogRef: MatDialogRef<UsuarioDialogComponent>,
+    private router: Router
   ) {
     this.userForm = this.fb.group({
       cveUsuario: [''],
@@ -48,11 +51,12 @@ export class UsuarioDialogComponent implements OnInit, OnDestroy {
   }
 
   getRoles() {
-    this.rolesService.getRoles().subscribe((response) => {
-      this.roles = response;
-    }, (error) => {
-      console.error("Error al obtener roles", error);
-    });
+    this.rolesService.getRoles()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe( (roles: Rol[]) => {
+        this.roles = roles;
+        this.pathData();
+      });
   }
 
   ngOnInit(): void {
@@ -64,11 +68,11 @@ export class UsuarioDialogComponent implements OnInit, OnDestroy {
     if (this.data.user.cveUsuario) {
       this.titleButton = "Actualizar";
       this.actionTODO = Action.EDIT;
+      this.userForm.updateValueAndValidity();
       this.userForm.patchValue({
         cveUsuario: this.data.user.cveUsuario,
         nombre: this.data.user.nombre,
         apellidos: this.data.user.apellidos,
-        //email: this.data.user.email,
         rol: this.data.user.roles.map((role: any) => role.id)
       });
       this.userForm.controls['username'].disable();
@@ -92,24 +96,29 @@ export class UsuarioDialogComponent implements OnInit, OnDestroy {
 
     if (this.actionTODO == Action.NEW) {
       var newUser: Usuario = {
-        nombre: formValue.nombre,
-        apellidos: formValue.apellidos,
-        username: formValue.username,
-        rol: formValue.rol
-      };
-      this.usuarioService.createUsuario(newUser).pipe(takeUntil(this.destroy$)).subscribe((data) => {
-        console.log("Usuario creado con éxito", newUser);
-      }, (error) => {
-        console.error("Error al crear usuario", error);
-      });
+        nombre: formValue.nombre!,
+        apellidos: formValue.apellidos!,
+        username: formValue.username!,
+        password: formValue.password!,
+        rol: formValue.rol!
+      }
+
+      this.usuarioService.createUsuario(newUser)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe( (data: Usuario) => {
+            this.dialogRef.close(data);
+            this.router.navigate(['/']);
+          });
+          
     } else {
       var { confirmPassword, password, username, ...updateUser } = formValue;
       const id = this.data.user.cveUsuario;
-      this.usuarioService.updateUsuario(id, updateUser).subscribe((response) => {
-        console.log("Usuario actualizado con éxito", response);
-      }, (error) => {
-        console.error("Error al actualizar usuario", error);
-      });
+      this.usuarioService.updateUsuario(id, updateUser)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe( (data: Usuario) => {
+            this.dialogRef.close(data);
+            this.router.navigate(['/']);
+          });
     }
   }
 

@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { UsuarioDialogComponent } from './components/usuario-dialog/usuario-dialog.component';
 import { UsuariosService } from './services/usuarios.service';
 import { Subject, takeUntil } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-usuarios',
@@ -20,16 +21,18 @@ export class UsuariosComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   displayedColumns: string[] = ['nombre', 'apellidos', 'username', 'rol', 'acciones'];
 
-  constructor(private dialog: MatDialog, private usuariosService: UsuariosService) { }
+  constructor(private dialog: MatDialog, private usuariosService: UsuariosService, private router: Router) { }
 
   ngOnInit(): void {
     this.listar();
   }
 
   listar(){
-    this.usuariosService.getUsuarios().pipe(takeUntil(this.destroy$)).subscribe((usuarios: Usuario[])=>{
-      this.dataSource.data = usuarios;
-    });
+    this.usuariosService.getUsuarios()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe( (usuarios: Usuario[]) => {
+        this.dataSource.data = usuarios;
+      });
   }
 
   ngAfterViewInit(): void {
@@ -55,6 +58,8 @@ export class UsuariosComponent implements OnInit, OnDestroy, AfterViewInit {
     this.usuariosService.deleteUsuario(cveUsuario).subscribe((response: any) => {
       if (response.success) {
         this.dataSource.data = this.dataSource.data.filter((usuario: Usuario) => usuario.cveUsuario !== element.cveUsuario);
+        this.listar();
+        this.router.navigate(['/']);
       } else {
         console.error('Error al eliminar usuario:', response.error);
       }
