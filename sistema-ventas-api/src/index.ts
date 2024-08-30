@@ -31,7 +31,7 @@ class Server {
 
         // * Uso de CORS(Cross Origin)
         this.app.use(cors({
-            origin: 'http://localhost:4200', // Cambia esto según sea necesario
+            origin: 'http://18.188.166.46', // Cambia esto según sea necesario
             methods: ['GET', 'POST', 'PUT', 'DELETE'],
         }));
 
