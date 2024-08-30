@@ -30,10 +30,7 @@ class Server {
         this.app.use(morgan("dev"));
 
         // * Uso de CORS(Cross Origin)
-        this.app.use(cors({
-            origin: 'http://18.188.166.46', // Cambia esto según sea necesario
-            methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        }));
+        this.app.use(cors());
 
         // * Generar restricciones a la API
         this.app.use(express.json());
