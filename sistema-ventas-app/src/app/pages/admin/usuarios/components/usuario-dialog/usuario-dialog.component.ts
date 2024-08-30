@@ -43,7 +43,7 @@ export class UsuarioDialogComponent implements OnInit, OnDestroy {
       password: ['', [Validators.required]],
       confirmPassword: ['', [Validators.required]]
     }, { 
-      validator: this.checkPasswords 
+      validator: this.passwordMatchValidator 
     });
   }
 
@@ -141,7 +141,7 @@ export class UsuarioDialogComponent implements OnInit, OnDestroy {
       formGroup.get('confirmPassword')?.setErrors(null);
     }
   }
-
+  
   ngOnDestroy(): void {
     this.destroy$.next({});
     this.destroy$.complete();

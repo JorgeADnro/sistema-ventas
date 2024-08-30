@@ -49,16 +49,29 @@ class UsuarioController {
 
   async getUsuarios(req: Request, res: Response) {
     try {
-      const usuarios = await prisma.usuario.findMany({
-        include: {
-          roles: true,
-        }
+      const token = <string>req.headers["auth"];
+      const currentUser = utils.getPayload(token);
+
+      const result = await prisma.usuario.findMany({
+          select: {
+              cveUsuario: true,
+              nombre: true,
+              apellidos: true,
+              username: true,
+              fechaRegistro: true,
+              roles: true
+          },
+          where: {
+              cveUsuario: {
+                  not: currentUser.cveUsuario
+              }
+          }
       });
-      res.json(usuarios);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Error al obtener usuarios" });
-    }
+
+      res.json(result);
+  } catch (error: any) {
+      return res.status(500).json({ message : `${error.message}` });
+  }
   }
 
   async getUsuario(req: Request, res: Response) {

@@ -57,16 +57,27 @@ class UsuarioController {
     getUsuarios(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const usuarios = yield database_1.default.usuario.findMany({
-                    include: {
-                        roles: true,
+                const token = req.headers["auth"];
+                const currentUser = utils_1.utils.getPayload(token);
+                const result = yield database_1.default.usuario.findMany({
+                    select: {
+                        cveUsuario: true,
+                        nombre: true,
+                        apellidos: true,
+                        username: true,
+                        fechaRegistro: true,
+                        roles: true
+                    },
+                    where: {
+                        cveUsuario: {
+                            not: currentUser.cveUsuario
+                        }
                     }
                 });
-                res.json(usuarios);
+                res.json(result);
             }
             catch (error) {
-                console.error(error);
-                res.status(500).json({ message: "Error al obtener usuarios" });
+                return res.status(500).json({ message: `${error.message}` });
             }
         });
     }
