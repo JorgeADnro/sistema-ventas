@@ -120,10 +120,11 @@ export class UsuarioDialogComponent implements OnInit, OnDestroy {
       // En modo de edición, solo limpia los campos de nombre y apellidos
       this.userForm.patchValue({
         nombre: '',
-        apellidos: ''
-      });
-    }
-  }
+        apellidos: '',
+        rol:''
+      });
+    }
+  }
 
   checkPasswords(group: FormGroup): { notSame: boolean } | null {
     let pass = group.get('password')?.value;
