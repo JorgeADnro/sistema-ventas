@@ -1,65 +1,72 @@
 <h1 mat-dialog-title>Usuario</h1>
-
 <mat-dialog-content>
     <form [formGroup]="userForm" (submit)="onSave()">
-        <mat-form-field class="full-width">
+        <!-- NOMBRE -->
+        <mat-form-field class="full-width" appearance="outline">
             <mat-label>Nombre</mat-label>
-            <input matInput formControlName="nombre" placeholder="Nombre">
+            <input type="text" formControlName="nombre" matInput>
             <mat-error>
-                {{baseForm.getErrorMessage(userForm.get('nombre'))}}
-            </mat-error>            
+                {{ baseForm.getErrorMessage(userForm.get('nombre')) }}
+            </mat-error>
         </mat-form-field>
-        <mat-form-field class="full-width">
+
+        <!-- APELLIDOS -->
+        <mat-form-field class="full-width" appearance="outline">
             <mat-label>Apellidos</mat-label>
-            <input matInput formControlName="apellidos" placeholder="Apellidos">
+            <input type="text" formControlName="apellidos" matInput>
             <mat-error>
-                {{baseForm.getErrorMessage(userForm.get('apellidos'))}}
+                {{ baseForm.getErrorMessage(userForm.get('apellidos')) }}
             </mat-error>
         </mat-form-field>
-        <mat-form-field class="full-width">
-            <mat-label>Username</mat-label>
-            <input matInput formControlName="username" placeholder="Username">
+
+        <!-- username -->
+        <mat-form-field class="full-width" appearance="outline">
+            <mat-label>Nombre de Usuario</mat-label>
+            <input type="text" formControlName="username" matInput>
             <mat-error>
-                {{baseForm.getErrorMessage(userForm.get('username'))}}
+                {{ baseForm.getErrorMessage(userForm.get('username')) }}
             </mat-error>
         </mat-form-field>
-        <!-- <mat-form-field class="full-width">
-            <mat-label>Correo</mat-label>
-            <input matInput formControlName="email" placeholder="Email">
-            <mat-error>
-                {{baseForm.getErrorMessage(userForm.get('email'))}}
-            </mat-error>
-        </mat-form-field> -->
-        <mat-form-field class="full-width">
-            <mat-label>Contraseña</mat-label>
-            <input matInput formControlName="password" placeholder="Password">
-            <mat-error>
-                {{baseForm.getErrorMessage(userForm.get('password'))}}
-            </mat-error>
-        </mat-form-field>
-        <mat-form-field class="full-width">
-            <mat-label>Confirmar contraseña</mat-label>
-            <input matInput formControlName="confirmPassword" placeholder="Confirmar contraseña">
-            <mat-error *ngIf="userForm.hasError('mismatch', 'confirmPassword')">
-                Las contraseñas no coinciden
-            </mat-error>
-            <mat-error>
-                {{baseForm.getErrorMessage(userForm.get('confirmPassword'))}}
-            </mat-error>
-        </mat-form-field>
+
+        <!-- ROL -->
         <mat-form-field class="full-width" apparence="outline">
             <mat-label>Rol(es)</mat-label>
             <mat-select formControlName="rol" multiple>
                 <mat-option *ngFor="let rol of roles" [value]="rol.id">{{ rol.nombre }}</mat-option>
             </mat-select>
-        </mat-form-field>   
+        </mat-form-field>
+
+        <!-- password -->
+        <mat-form-field *ngIf="actionTODO == 'new'" class="full-width" appearance="outline">
+            <mat-label>Contraseña</mat-label>
+            <input type="password" formControlName="password" matInput>
+            <mat-error>
+                {{ baseForm.getErrorMessage(userForm.get('password')) }}
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Confirm Password -->
+        <mat-form-field *ngIf="actionTODO == 'new'" class="full-width" appearance="outline">
+            <mat-label>Repetir Contraseña</mat-label>
+            <input type="password" formControlName="confirmPassword" matInput>
+            <mat-error>
+                {{ baseForm.getErrorMessage(userForm.get('confirmPassword')) }}
+            </mat-error>
+        </mat-form-field>
+
+        <div align="center">
+            <button type="button" mat-flat-button color="warn" class="me-2">
+                Limpiar
+            </button>
+            <button type="submit" mat-flat-button color="primary">
+                {{ titleButton }}
+            </button>
+        </div>
     </form>
 </mat-dialog-content>
+
 <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close>
         Cerrar
-    </button>
-    <button type="button" mat-flat-button color="primary" class="me-2" (click)="onSave()" [disabled]="userForm.invalid">
-        {{ titleButton }}
     </button>
 </mat-dialog-actions>

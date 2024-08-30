@@ -109,8 +109,6 @@ class UsuarioController {
                     data: {
                         nombre,
                         apellidos,
-                        username,
-                        email,
                         roles: {
                             set: rol.map((roleId) => ({ id: roleId }))
                         }

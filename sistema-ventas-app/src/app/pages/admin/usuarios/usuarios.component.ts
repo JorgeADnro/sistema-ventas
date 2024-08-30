@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Usuario } from '../../../shared/models/usuario.interface';
@@ -6,29 +6,30 @@ import { MatDialog } from '@angular/material/dialog';
 import { UsuarioDialogComponent } from './components/usuario-dialog/usuario-dialog.component';
 import { UsuariosService } from './services/usuarios.service';
 import { Subject, takeUntil } from 'rxjs';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-usuarios',
   templateUrl: './usuarios.component.html',
-  styleUrls: ['./usuarios.component.scss']
+  styleUrl: './usuarios.component.scss'
 })
 export class UsuariosComponent implements OnInit, OnDestroy, AfterViewInit {
 
+  constructor(private dialog: MatDialog, 
+              private usuarioSvc: UsuariosService) {}
+
   private destroy$ = new Subject();
-
-  dataSource = new MatTableDataSource<Usuario>();
+  dataSource = new MatTableDataSource();
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  displayedColumns: string[] = ['nombre', 'apellidos', 'username', 'rol', 'acciones'];
+  displayedColumns: String[] = ['nombre', 'apellidos', 'username', 'rol', 'acciones'];
 
-  constructor(private dialog: MatDialog, private usuariosService: UsuariosService, private router: Router) { }
+  // ng g s pages/admin/usuarios/services/usuarios
 
   ngOnInit(): void {
     this.listar();
   }
 
-  listar(){
-    this.usuariosService.getUsuarios()
+  listar() {
+    this.usuarioSvc.listarUsuarios()
       .pipe(takeUntil(this.destroy$))
       .subscribe( (usuarios: Usuario[]) => {
         this.dataSource.data = usuarios;
@@ -36,33 +37,38 @@ export class UsuariosComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
+      this.dataSource.paginator = this.paginator;
   }
 
-  onOpenModal(user = {}): void {
+  onOpenModal(user = {}) {
     const dialogRef = this.dialog.open(UsuarioDialogComponent, {
+      maxWidth: '100%',
       width: '80%',
       data: {
         user
       }
     });
+
+    dialogRef.afterClosed()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe( result => {
+        if (result) {
+          this.listar();
+        }
+      });
+  }
+
+  onDelete(cveUsuario: number) {
+    this.usuarioSvc.eliminarUsuario(cveUsuario)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe( (result: Usuario) => {
+        this.listar();
+      });
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next({});
-    this.destroy$.complete();
+      this.destroy$.next({});
+      this.destroy$.complete();
   }
 
-  eliminarUsuario(element: any): void {
-    const cveUsuario = element.cveUsuario;
-    this.usuariosService.deleteUsuario(cveUsuario).subscribe((response: any) => {
-      if (response.success) {
-        this.dataSource.data = this.dataSource.data.filter((usuario: Usuario) => usuario.cveUsuario !== element.cveUsuario);
-        this.listar();
-        this.router.navigate(['/']);
-      } else {
-        console.error('Error al eliminar usuario:', response.error);
-      }
-    });
-  }
 }

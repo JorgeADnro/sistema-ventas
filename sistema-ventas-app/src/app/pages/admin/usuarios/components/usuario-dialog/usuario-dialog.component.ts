@@ -4,10 +4,9 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BaseForm } from '../../../../../shared/utils/base-forms';
 import { Subject, takeUntil } from 'rxjs';
 import { UsuariosService } from '../../services/usuarios.service';
-import { RolesService } from '../../services/roles.service';
 import { Usuario } from '../../../../../shared/models/usuario.interface';
 import { Rol } from '../../../../../shared/models/rol.interface';
-import { Router } from '@angular/router';
+import { RolesService } from '../../services/roles.service';
 
 enum Action {
   EDIT = 'edit',
@@ -22,71 +21,67 @@ enum Action {
 export class UsuarioDialogComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<any>();
-
-  roles: any[] = [];
-
   titleButton = "Guardar";
   actionTODO = Action.NEW;
+  roles: Rol[] = [];
   userForm: FormGroup;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
+    public dialogRef: MatDialogRef<UsuarioDialogComponent>,
     private fb: FormBuilder,
     public baseForm: BaseForm,
-    private usuarioService: UsuariosService,
-    private rolesService: RolesService,
-    public dialogRef: MatDialogRef<UsuarioDialogComponent>,
-    private router: Router
+    private usuarioSvc: UsuariosService,
+    private rolesService: RolesService
   ) {
     this.userForm = this.fb.group({
       cveUsuario: [''],
       nombre: ['', [Validators.required, Validators.minLength(3)]],
       apellidos: ['', [Validators.required, Validators.minLength(3)]],
       username: ['', [Validators.required, Validators.minLength(3)]],
-      //email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]],
-      confirmPassword: ['', [Validators.required]],
       rol: [[], [Validators.required]],
-    }, { validator: this.passwordMatchValidator });
-  }
-
-  getRoles() {
-    this.rolesService.getRoles()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe( (roles: Rol[]) => {
-        this.roles = roles;
-        this.pathData();
-      });
+      password: ['', [Validators.required]],
+      confirmPassword: ['', [Validators.required]]
+    }, { 
+      validator: this.checkPasswords 
+    });
   }
 
   ngOnInit(): void {
-    this.pathData();
-    this.getRoles();
+    this.usuarioSvc.listarRoles().pipe(takeUntil(this.destroy$)).subscribe((roles: Rol[]) => {
+      this.roles = roles;
+      this.pathData();
+    });
   }
 
   pathData() {
     if (this.data.user.cveUsuario) {
-      this.titleButton = "Actualizar";
-      this.actionTODO = Action.EDIT;
-      this.userForm.updateValueAndValidity();
       this.userForm.patchValue({
-        cveUsuario: this.data.user.cveUsuario,
-        nombre: this.data.user.nombre,
-        apellidos: this.data.user.apellidos,
+        cveUsuario: this.data?.user.cveUsuario,
+        nombre: this.data?.user.nombre,
+        apellidos: this.data?.user.apellidos,
+        username: this.data?.user.username,
         rol: this.data.user.roles.map((role: any) => role.id)
       });
-      this.userForm.controls['username'].disable();
-      this.userForm.controls['password'].disable();
-      this.userForm.controls['confirmPassword'].disable();
+
+      this.userForm.get("username")?.disable();
+
+      // Eliminar las validaciones password, confirmPassword
+      this.userForm.get("password")?.setValidators(null);
+      this.userForm.get("password")?.setErrors(null);
+      this.userForm.get("confirmPassword")?.setValidators(null);
+      this.userForm.get("confirmPassword")?.setErrors(null);
+
+      this.userForm.updateValueAndValidity();
+
+      // Actualizar
+      this.titleButton = "Actualizar";
+      this.actionTODO = Action.EDIT;
     } else {
+      // Insert
       this.titleButton = "Guardar";
       this.actionTODO = Action.NEW;
     }
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next({});
-    this.destroy$.complete();
   }
 
   onSave() {
@@ -95,31 +90,45 @@ export class UsuarioDialogComponent implements OnInit, OnDestroy {
     var formValue = this.userForm.getRawValue();
 
     if (this.actionTODO == Action.NEW) {
+      // Insert
       var newUser: Usuario = {
         nombre: formValue.nombre!,
         apellidos: formValue.apellidos!,
         username: formValue.username!,
         password: formValue.password!,
         rol: formValue.rol!
-      }
-
-      this.usuarioService.createUsuario(newUser)
-          .pipe(takeUntil(this.destroy$))
-          .subscribe( (data: Usuario) => {
-            this.dialogRef.close(data);
-            this.router.navigate(['/']);
-          });
-          
+      };
+      this.usuarioSvc.insertarUsuario(newUser)
+        .pipe(takeUntil(this.destroy$)).subscribe((data: Usuario) => {
+          this.dialogRef.close(data);
+        });
     } else {
       var { confirmPassword, password, username, ...updateUser } = formValue;
       const id = this.data.user.cveUsuario;
-      this.usuarioService.updateUsuario(id, updateUser)
+      this.usuarioSvc.actualizarUsuario(id, updateUser)
           .pipe(takeUntil(this.destroy$))
           .subscribe( (data: Usuario) => {
             this.dialogRef.close(data);
-            this.router.navigate(['/']);
           });
     }
+  }
+
+  onClear(): void {
+    if (this.actionTODO === Action.NEW) {
+      this.userForm.reset(); // Limpia todos los campos en modo nuevo
+    } else {
+      // En modo de edición, solo limpia los campos de nombre y apellidos
+      this.userForm.patchValue({
+        nombre: '',
+        apellidos: ''
+      });
+    }
+  }
+
+  checkPasswords(group: FormGroup): { notSame: boolean } | null {
+    let pass = group.get('password')?.value;
+    let confirmPass = group.get('confirmPassword')?.value;
+    return pass === confirmPass ? null : { notSame: true };
   }
 
   private passwordMatchValidator(formGroup: FormGroup) {
@@ -131,5 +140,10 @@ export class UsuarioDialogComponent implements OnInit, OnDestroy {
     } else {
       formGroup.get('confirmPassword')?.setErrors(null);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next({});
+    this.destroy$.complete();
   }
 }

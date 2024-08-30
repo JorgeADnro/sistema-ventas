@@ -27,10 +27,17 @@ class Server {
         // * Mostrar las peticiones en consola
         this.app.use((0, morgan_1.default)("dev"));
         // * Uso de CORS(Cross Origin)
-        this.app.use((0, cors_1.default)());
+        this.app.use((0, cors_1.default)({
+            origin: 'http://localhost:4200', // Cambia esto según sea necesario
+            methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        }));
         // * Generar restricciones a la API
         this.app.use(express_1.default.json());
         this.app.use(express_1.default.urlencoded({ extended: false }));
+        this.app.use((req, res, next) => {
+            console.log(`Incoming request: ${req.method} ${req.url}`);
+            next();
+        });
     }
     // TODO: Generar un método para la configuración de rutas
     routes() {

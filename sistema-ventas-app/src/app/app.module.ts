@@ -18,7 +18,7 @@ import { tokenInterceptor } from './shared/interceptors/token.interceptor';
     AppComponent,
     HeaderComponent,
     FooterComponent,
-    SidebarComponent
+    SidebarComponent,
   ],
   imports: [
     BrowserModule,
